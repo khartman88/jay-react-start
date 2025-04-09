@@ -6,15 +6,18 @@ import TodoForm from './TodoForm';
 
 function App() {
 
-  const [newTodo, setNewTodo] = useState("Create Todo's");
+  const [todoList, setTodoList] = useState([]);
+
+  function handleAddTodo(newTodo) {
+    setTodoList([...todoList, newTodo]);
+  }
 
   return (
     
     <div>
       <h1>My Todos</h1>
-      <TodoForm />
-      <p>{newTodo}</p>
-      <TodoList />
+      <TodoForm onAddTodo={handleAddTodo}/>
+      <TodoList todoList={todoList} />
     </div>
     
   );
