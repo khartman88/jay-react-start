@@ -67,27 +67,23 @@ function App() {
     };
 
     const payload = {
-      records: [
-        {
-          fields: {
-            title: newTodo.title,
-            isCompleted: newTodo.isCompleted,
-          },
-        },
-      ],
+      fields: {
+        title: newTodo.title,
+        isCompleted: newTodo.isCompleted,
+      },
     };
 
     const options = {
       method: "POST",
       headers: {
         Authorization: token,
-        'Content-Type': 'application/json', 
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
     };
 
     try {
-      const resp = await fetch( url, options);
+      const resp = await fetch(url, options);
       if (!resp.ok) {
         throw new Error(resp.statusText || "Failed to add todo");
       }
@@ -114,38 +110,132 @@ function App() {
     }
   }
 
-  function completeTodo(id) {
-
-    const updatedTodos = todoList.map((todo) => {
-      if (todo.id === id) {
-        return { ...todo, isCompleted: true };
-      }
-      return todo;
-        });
-      
-    setTodoList(updatedTodos);
-  }
-
-  function updateTodo(editedTodo) {
+  async function updateTodo(editedTodo) {
+    const originalTodo = todoList.find((todo) => todo.id === editedTodo.id);
     const updatedTodos = todoList.map((todo) =>
       todo.id === editedTodo.id ? { ...editedTodo } : todo
     );
     setTodoList(updatedTodos);
+
+    const payload = {
+      records: [
+        {
+          id: editedTodo.id,
+          fields: {
+            title: editedTodo.title,
+            isCompleted: editedTodo.isCompleted,
+          },
+        },
+      ],
+    };
+
+    const options = {
+      method: "PATCH",
+      headers: {
+        Authorization: token,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    };
+
+    try {
+      const resp = await fetch(url, options);
+      if (!resp.ok) {
+        throw new Error(resp.statusText || "Failed to update todo");
+      }
+
+      const { records } = await resp.json();
+      const updatedTodo = {
+        id: records[0].id,
+        ...records[0].fields,
+      };
+
+      const finalTodos = updatedTodos.map((todo) =>
+        todo.id === updatedTodo.id ? { ...updatedTodo } : todo
+      );
+      setTodoList(finalTodos);
+
+    } catch (error) {
+      console.error(error);
+      setErrorMessage(`${error.message}. Reverting todo...`);
+
+      const revertedTodos = todoList.map((todo) =>
+        todo.id === originalTodo.id ? originalTodo : todo
+      );
+      setTodoList(revertedTodos);
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function completeTodo(id) {
+    const originalTodo = todoList.find((todo) => todo.id === id);
+    const updatedTodo = { ...originalTodo, isCompleted: true };
+
+    const optimisticTodos = todoList.map((todo) =>
+      todo.id === id ? updatedTodo : todo
+    );
+    setTodoList(optimisticTodos);
+
+    const payload = {
+      records: [
+        {
+          id,
+          fields: {
+            title: updatedTodo.title,
+            isCompleted: true,
+          },
+        },
+      ],
+    };
+
+    const options = {
+      method: "PATCH",
+      headers: {
+        Authorization: token,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    };
+
+    try {
+      const resp = await fetch(url, options);
+      if (!resp.ok) {
+        throw new Error(resp.statusText || "Failed to complete todo");
+      }
+
+      const { records } = await resp.json();
+      const completedTodo = {
+        id: records[0].id,
+        ...records[0].fields,
+      };
+
+      const finalTodos = todoList.map((todo) =>
+        todo.id === id ? completedTodo : todo
+      );
+      setTodoList(finalTodos);
+
+    } catch (error) {
+      console.error(error);
+      setErrorMessage(`${error.message}. Reverting todo...`);
+
+      const revertedTodos = todoList.map((todo) =>
+        todo.id === originalTodo.id ? originalTodo : todo
+      );
+      setTodoList(revertedTodos);
+    }
   }
 
   return (
-    
     <div>
-      
       <h1>My Todos</h1>
-      <TodoForm onAddTodo={handleAddTodo} isSaving={isSaving}/>
+      <TodoForm onAddTodo={handleAddTodo} isSaving={isSaving} />
       <TodoList
         todoList={todoList}
         onCompleteTodo={completeTodo}
         onUpdateTodo={updateTodo}
         isLoading={isLoading}
       />
-
       {errorMessage && (
         <div>
           <hr />
@@ -153,7 +243,6 @@ function App() {
           <button onClick={() => setErrorMessage("")}>Dismiss</button>
         </div>
       )}
-
     </div>
   );
 }
