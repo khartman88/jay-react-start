@@ -73,6 +73,9 @@ function App() {
       },
     };
 
+    // DEEEEBUUUUUUUGGGGGGGGGG
+    console.log("Payload to send:", JSON.stringify(payload));
+
     const options = {
       method: "POST",
       headers: {
@@ -88,14 +91,17 @@ function App() {
         throw new Error(resp.statusText || "Failed to add todo");
       }
 
-      const {records} = await resp.json();
+      const record = await resp.json();
+
+      // DEBBBBBUGGGGGGG
+      console.log("Airtable response:", record);
 
       const savedTodo = {
-        id: records[0].id,
-        ...records[0].fields,
+        id: record.id,
+        ...record.fields,
       };
 
-      if (!records[0].fields.isCompleted) {
+      if (!record.fields.isCompleted) {
         savedTodo.isCompleted = false;
       }
 
