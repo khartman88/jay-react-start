@@ -1,9 +1,11 @@
-import {useState, useRef} from "react";
+import {useState, useRef, useEffect} from "react";
 import TextInputWithLabel from "../shared/TextInputWithLabel";
 
 function TodoForm({onAddTodo, isSaving, queryString, setQueryString}) {
     const [workingTodo, setWorkingTodo] = useState("");
     const todoTitleInput = useRef(null);
+
+    const [localQueryString, setLocalQueryString] = useState(queryString);
 
     function handleAddTodo(event) {
         event.preventDefault();
@@ -14,6 +16,14 @@ function TodoForm({onAddTodo, isSaving, queryString, setQueryString}) {
           }
         }
 
+     useEffect(() => {
+        const debounce = setTimeout(() => {
+            setQueryString(localQueryString);
+        }, 500);
+
+        return () => clearTimeout(debounce);
+    }, [localQueryString, setQueryString]);
+
     return (
         <form onSubmit={handleAddTodo}>
             
@@ -22,11 +32,11 @@ function TodoForm({onAddTodo, isSaving, queryString, setQueryString}) {
                 <input
                     id="searchTodos"
                     type="text"
-                    value={queryString}
-                    onChange={(e) => setQueryString(e.target.value)}
+                    value={localQueryString}
+                    onChange={(e) => setLocalQueryString(e.target.value)}
                 />
                 &nbsp;
-                <button type="button" onClick={() => setQueryString("")}>
+                <button type="button" onClick={() => setLocalQueryString("")}>
                     Clear
                 </button>
             </div>
