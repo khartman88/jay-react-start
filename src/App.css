@@ -1,0 +1,42 @@
+
+/* font style */
+body, p {
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+h1 {
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+}
+
+/* background color */
+body {
+    margin: 3rem;
+    padding: 3rem;
+    background-color: rgb(115, 173, 174);
+}
+
+/* button styling */
+button {
+    padding: 0.5rem 1rem;
+    border: 2px solid rgb(32, 12, 181);
+    background-color: antiquewhite;
+    color: blue;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: rgb(211, 170, 4);
+}
+
+button:disabled {
+    background-color: dimgray;
+    font-style: italic;
+}
+
+/* input style */
+input[type="text"] {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
