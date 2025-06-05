@@ -10,7 +10,7 @@ function TodoListItem({ todo, onCompleteTodo, onUpdateTodo }) {
 
     useEffect(() => {
         setWorkingTitle(todo.title);
-      }, [todo]);
+    }, [todo]);
 
     //cancel
     function handleCancel() {
@@ -28,7 +28,7 @@ function TodoListItem({ todo, onCompleteTodo, onUpdateTodo }) {
         event.preventDefault();
         if (!isEditing || workingTitle === todo.title) return;
 
-        onUpdateTodo({ ...todo, title: workingTitle });
+        onUpdateTodo({ ...todo, fields: { ...todo, title: workingTitle } });
         setIsEditing(false);
     }
 
@@ -47,7 +47,7 @@ return (
                     <button type="submit">Update</button>
                 </>
         ) : (
-                <>
+
                     <label>
                         <input
                             type="checkbox"
@@ -55,13 +55,12 @@ return (
                             checked={todo.isCompleted}
                             onChange={() => onCompleteTodo(todo.id)}
                         />
+                        <span onClick={() => setIsEditing(true)}>{todo.title}</span>
                     </label>
-                    <span onClick={() => setIsEditing(true)}>{todo.title}</span>
-                </>
-            )}
-        </form>
-    </li>
-);
+                )}
+            </form>
+        </li>
+    );
 }
 
 export default TodoListItem;
