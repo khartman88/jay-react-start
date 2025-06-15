@@ -1,4 +1,9 @@
 
+import { Routes, Route } from 'react-router-dom';
+import TodosPage from './pages/TodosPage';
+import AboutPage from './pages/AboutPage';
+import NotFoundPage from './pages/NotFoundPage';
+
 import {
   reducer as todosReducer,
   initialState as initialTodosState,
@@ -10,11 +15,22 @@ import './App.css';
 import TodoList from './features/TodoList/TodoList';
 import TodoForm from './features/TodoForm';
 import styles from './App.module.css';
+import Header from './shared/Header';
+import { useLocation } from 'react-router-dom';
 
 const url = `https://api.airtable.com/v0/${import.meta.env.VITE_BASE_ID}/${import.meta.env.VITE_TABLE_NAME}`;
 const token = `Bearer ${import.meta.env.VITE_PAT}`;
 
 function App() {
+  const location = useLocation();
+  const [title, setTitle] = useState('');
+
+    useEffect(() => {
+      if (location.pathname === '/') setTitle('Todo List');
+      else if (location.pathname === '/about') setTitle('About');
+      else setTitle('Not Found');
+    }, [location]);
+
   const [todoState, dispatch] = useReducer(todosReducer, initialTodosState);
 
   const [sortField, setSortField] = useState("createdTime");
@@ -250,7 +266,7 @@ function App() {
 
   return (
     <div className={styles.appContainer}>
-      <h1>My Todos</h1>
+      <Header title={title} />
 
       <div>
         <label>
@@ -270,19 +286,23 @@ function App() {
           </select>
         </label>
       </div>
-
-      <TodoForm
-        onAddTodo={handleAddTodo}
-        isSaving={todoState.isSaving}
-        queryString={queryString}
-        setQueryString={setQueryString}  
-      />
-      <TodoList
-        todoList={todoState.todoList}
-        onCompleteTodo={completeTodo}
-        onUpdateTodo={updateTodo}
-        isLoading={todoState.isLoading}
-      />
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <TodosPage
+                todoState={todoState}
+                handleAddTodo={handleAddTodo}
+                updateTodo={updateTodo}
+                completeTodo={completeTodo}
+                queryString={queryString}
+                setQueryString={setQueryString}
+              />
+            }
+          />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
       {todoState.errorMessage && (
         <div className={styles.errorBox}>
           <hr />
